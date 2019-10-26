@@ -180,6 +180,10 @@ that you can edit your own hosts file and add the appropriate addresses.
     192.168.1.16 kpi6
     192.168.1.198 radish 
 
+Copy these entries and paste them on the appropriate host. Edit as
+you see fit for your needs. It is also possible that this step isn't necessary.
+If you never again expect to ssh to your nodes, this probably doesn't matter.
+
     # run on kpi1 (and so on)
     sudo hostnamectl --transient set-hostname kpi1
     sudo hostnamectl --static set-hostname kpi1
@@ -281,7 +285,7 @@ From your workstation, run these commands.
  This takes a while to run. Be patient.
  
 # *************** IMPORTANT ******************
-The following command produces a connect command that you will need for your
+The following command produces a connect command that you will need later for your
 nodes to join. DO NOT LOSE IT, BUT DEFINITELY SECURE IT! This string gives access to your master.
  
     sudo kubeadm init --pod-network-cidr=100.64.0.0/16 --service-cidr=100.65.0.0/16 --node-name kpi1
@@ -348,81 +352,100 @@ writing.
 It's not at all useful, yet. But, it is officially a running Kubernetes master
 running on a Raspberry Pi.
 
-# Let's join a node
-# Do not use my command. That server is long since dead, anyway. Use your string that
-# you copied from the kubeadm init you ran on the master node. I did tell you to save it.
+## Let's join a node
+Do not use my command. That server is long since dead, anyway. Use your string that
+you copied from the kubeadm init you ran on the master node. I did tell you to save it.
 
-# From your workstation
-ssh ubuntu@kpi2
-# sudo kubeadm reset
-sudo kubeadm join 192.168.1.11:6443 --token lo25ld.csjutgcpsnxacxqg --discovery-token-ca-cert-hash sha256:a0e01a1cbc7b901a00ff66d5e9dfc5c042499faeeb4eb454095f1fb4766ddfe4
-# Install the nfs client on all workers (not the master, though)
-sudo apt install nfs-common -y
-exit
+## From your workstation
 
-# That's it. The node is joined.
+    ssh ubuntu@kpi2
+    # sudo kubeadm reset
+    sudo kubeadm join 192.168.1.11:6443 --token lo25ld.csjutgcpsnxacxqg --discovery-token-ca-cert-hash sha256:a0e01a1cbc7b901a00ff66d5e9dfc5c042499faeeb4eb454095f1fb4766ddfe4
+    # Install the nfs client on all workers (not the master, though)
+    sudo apt install nfs-common -y
+    exit
 
-# Do it again
-ssh ubuntu@kpi3
-# sudo kubeadm reset
-sudo kubeadm join 192.168.1.11:6443 --token lo25ld.csjutgcpsnxacxqg --discovery-token-ca-cert-hash sha256:a0e01a1cbc7b901a00ff66d5e9dfc5c042499faeeb4eb454095f1fb4766ddfe4
-exit
+#### That's it. The node is joined.
 
-# And again
-ssh ubuntu@kpi4
-# sudo kubeadm reset
-sudo kubeadm join 192.168.1.11:6443 --token lo25ld.csjutgcpsnxacxqg --discovery-token-ca-cert-hash sha256:a0e01a1cbc7b901a00ff66d5e9dfc5c042499faeeb4eb454095f1fb4766ddfe4
-exit
+## Do it again
 
-# And again
-ssh ubuntu@kpi5
-# sudo kubeadm reset
-sudo kubeadm join 192.168.1.11:6443 --token lo25ld.csjutgcpsnxacxqg --discovery-token-ca-cert-hash sha256:a0e01a1cbc7b901a00ff66d5e9dfc5c042499faeeb4eb454095f1fb4766ddfe4
-exit
+    ssh ubuntu@kpi3
+    # sudo kubeadm reset
+    sudo kubeadm join 192.168.1.11:6443 --token lo25ld.csjutgcpsnxacxqg --discovery-token-ca-cert-hash sha256:a0e01a1cbc7b901a00ff66d5e9dfc5c042499faeeb4eb454095f1fb4766ddfe4
+    exit
 
-# **************** HOWEVER *****************
-# Don't join the last node. Let's put some io resources there where they
-# won't get abused by kubelets
-# On NFS Server (kpi6)
-# NOTE: You do not need an nfs server. I'm installing one. You do you.
-ssh ubuntu@kpi6
-sudo apt install nfs-kernel-server
+## And again
 
-mkdir /ssd # Use what name you want, but be ready to change it where it's used
-# Your UUID string will differ. Get it from `sudo blkid` and look for the SSD drive you had laying around
-sudo vi /etc/fstab
-UUID=95b55dff-3177-49b7-81f0-26531d60ea7e /ssd	ext4  defaults 0 0
+    ssh ubuntu@kpi4
+    # sudo kubeadm reset
+    sudo kubeadm join 192.168.1.11:6443 --token lo25ld.csjutgcpsnxacxqg --discovery-token-ca-cert-hash sha256:a0e01a1cbc7b901a00ff66d5e9dfc5c042499faeeb4eb454095f1fb4766ddfe4
+    exit
 
-# Run this
-sudo mount -a
-sudo mkdir /ssd/pv1
-sudo mkdir /ssd/pv2
+## And again
 
-sudo vi /etc/exports
-# Edit this to be more secure. This is currently exposed to the world.
-/ssd/pv1	*(rw,sync,no_root_squash)
-/ssd/pv2	*(rw,sync,no_root_squash)
+    ssh ubuntu@kpi5
+    # sudo kubeadm reset
+    sudo kubeadm join 192.168.1.11:6443 --token lo25ld.csjutgcpsnxacxqg --discovery-token-ca-cert-hash sha256:a0e01a1cbc7b901a00ff66d5e9dfc5c042499faeeb4eb454095f1fb4766ddfe4
+    exit
 
-# Run this
-sudo systemctl restart nfs-kernel-server
-# We're done with this host (If something goes wrong, you may need to come back)
-exit
+# HOWEVER 
+Don't join the last node. Let's put some io resources there where they
+won't get abused by kubelets.
 
-# ******************************** Next Stage ******************************
-# Go back to the master node
-ssh ubuntu@kpi1
-cd kube
+## On NFS Server (kpi6)
+*NOTE: You do not need an nfs server. I'm installing one. You do you.*
 
-# Install the PersistentVolume and PersistentVolumeClaim for the nginx web host.
-kubectl create -f nginx-nfs-pv.yaml
+    ssh ubuntu@kpi6
+    sudo apt install nfs-kernel-server
+    
+    sudo blkid
+    mkdir /ssd # Use what name you want, but be ready to change it where it's used
+    
+Your UUID string will differ.
 
-# Install a couple of instances of nginx to serve our page
-kubectl create -f nginx.yaml
+    sudo vi /etc/fstab
+    UUID=95b55dff-3177-49b7-81f0-26531d60ea7e /ssd	ext4  defaults 0 0
 
-# Test that it's started
-kubectl get services
+    # Run this
+    sudo mount -a
+    sudo mkdir /ssd/pv1
+    sudo mkdir /ssd/pv2
+    
+    # Don't run these commands if you already have a website in these directories
+    echo "<html><body><b>This is bold text</b></body></html>" > /ssd/pv1/index.html
+    echo "<html><body><i>This is italic text</i></body></html>" > /ssd/pv2/index.html
+    
+    
+    sudo vi /etc/exports
+    # Edit this to be more secure. This is currently exposed to the world.
+    /ssd/pv1	*(rw,sync,no_root_squash)
+    /ssd/pv2	*(rw,sync,no_root_squash)
+    
+    # Run this
+    sudo systemctl restart nfs-kernel-server
+    # We're done with this host (If something goes wrong, you may need to come back)
+    exit
 
-# Note the external ip address of this host. This is the external IP. 
-# It's on a node somewhere. Try it from a web browser on your network.
-# If you didn't change the metal-l2.yaml file, this is probably
-http://192.168.1.40/
+# Next Stage 
+
+Go back to the master node
+
+    ssh ubuntu@kpi1
+    cd kube
+
+## Install the PersistentVolume and PersistentVolumeClaim for the nginx web host.
+    kubectl create -f nginx-nfs-pv.yaml
+
+## Install a couple of instances of nginx to serve our page
+This is actually two instances of nginx pointed at pv1 and one pointed at pv2
+
+    kubectl create -f nginx.yaml
+
+## Test that it's started
+    kubectl get services
+
+## Note the external ip address of this host. This is the external IP. 
+It's on a node somewhere. Try it from a web browser on your network.
+If you didn't change the metal-l2.yaml file, this is probably
+
+[http://192.168.1.40/](http://192.168.1.40/)
