@@ -1,16 +1,25 @@
+# Install Kubernetes on a pile of Raspberry Pi
+
+## My starting hardware
+I started with Six Raspberry Pi in a stack with a pair of fans against the stack
+for cooling. Under that was a cheap network switch. Plugged into the bottom of the
+stack was a single SSD hard drive.
+
 # Edit your /etc/hosts
-# 192.168.1.11 kpi1
-# 192.168.1.12 kpi2
-# 192.168.1.13 kpi3
-# 192.168.1.14 kpi4
-# 192.168.1.15 kpi5
-# 192.168.1.16 kpi6
-# None of these entries are necessary if your router learns dns names
-# And none of them are necessary for kubernetes. They're simply here for ssh access
-# 192.168.1.198 radish 
+
+    # None of these entries are necessary if your router learns dns names
+    # And none of them are necessary for kubernetes. They're simply here for ssh access
+    
+    192.168.1.11 kpi1
+    192.168.1.12 kpi2
+    192.168.1.13 kpi3
+    192.168.1.14 kpi4
+    192.168.1.15 kpi5
+    192.168.1.16 kpi6
+    192.168.1.198 radish 
 
 # You'll have to do this step on the PI console unless you want DHCP all over the place
-# ****** IMPORTANT **********************
+### ****** IMPORTANT **********************
 # add this line, uncommented, to assign the static IP address of your node. Make sure the spacing matches. It should look like this
 #network:
 #    version: 2
@@ -215,19 +224,18 @@ exit
 ssh ubuntu@kpi3
 # sudo kubeadm reset
 sudo kubeadm join 192.168.1.11:6443 --token lo25ld.csjutgcpsnxacxqg --discovery-token-ca-cert-hash sha256:a0e01a1cbc7b901a00ff66d5e9dfc5c042499faeeb4eb454095f1fb4766ddfe4
-sudo apt install nfs-common -y
 exit
+
 # And again
 ssh ubuntu@kpi4
 # sudo kubeadm reset
 sudo kubeadm join 192.168.1.11:6443 --token lo25ld.csjutgcpsnxacxqg --discovery-token-ca-cert-hash sha256:a0e01a1cbc7b901a00ff66d5e9dfc5c042499faeeb4eb454095f1fb4766ddfe4
-sudo apt install nfs-common -y
 exit
+
 # And again
 ssh ubuntu@kpi5
 # sudo kubeadm reset
 sudo kubeadm join 192.168.1.11:6443 --token lo25ld.csjutgcpsnxacxqg --discovery-token-ca-cert-hash sha256:a0e01a1cbc7b901a00ff66d5e9dfc5c042499faeeb4eb454095f1fb4766ddfe4
-sudo apt install nfs-common -y
 exit
 
 # **************** HOWEVER *****************
@@ -238,17 +246,20 @@ exit
 ssh ubuntu@kpi6
 sudo apt install nfs-kernel-server
 
+mkdir /ssd # Use what name you want, but be ready to change it where it's used
 # Your UUID string will differ. Get it from `sudo blkid` and look for the SSD drive you had laying around
 sudo vi /etc/fstab
 UUID=95b55dff-3177-49b7-81f0-26531d60ea7e /ssd	ext4  defaults 0 0
 
 # Run this
 sudo mount -a
+sudo mkdir /ssd/pv1
+sudo mkdir /ssd/pv2
 
 sudo vi /etc/exports
-# Edit this to be more secure
+# Edit this to be more secure. This is currently exposed to the world.
 /ssd/pv1	*(rw,sync,no_root_squash)
-#/ssd/pv2	*(rw,sync,no_root_squash)
+/ssd/pv2	*(rw,sync,no_root_squash)
 
 # Run this
 sudo systemctl restart nfs-kernel-server
@@ -271,4 +282,5 @@ kubectl get services
 
 # Note the external ip address of this host. This is the external IP. 
 # It's on a node somewhere. Try it from a web browser on your network.
+# If you didn't change the metal-l2.yaml file, this is probably
 http://192.168.1.40/
