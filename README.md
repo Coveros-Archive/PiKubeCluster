@@ -161,6 +161,9 @@ I haven't gotten that far.
 
 #### Do this for each node. They are duplicated here for my convenience
 
+I open 6 terminal windows on one monitor and ssh to each host. Some commands
+take a little time and you can paste them in multiple windows at a time.
+
 ## Edit your /etc/hosts
 
 None of these entries are 100% necessary if your router learns dns names
