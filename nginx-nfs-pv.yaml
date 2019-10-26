@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nginx-nfs
+spec:
+  capacity:
+    storage: 5Gi # This size is used to match a volume to a tenents claim
+  accessModes:
+    - ReadWriteOnce # Access modes are defined below
+  persistentVolumeReclaimPolicy: Recycle # Reclaim policies are defined below
+  nfs:
+    server: kpi6 # Please change this to your NFS server
+    path: /ssd/pv1 # Please change this to the relevant share
+
+---
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nginx-nfs2
+spec:
+  capacity:
+    storage: 5Gi # This size is used to match a volume to a tenents claim
+  accessModes:
+    - ReadWriteOnce # Access modes are defined below
+  persistentVolumeReclaimPolicy: Recycle # Reclaim policies are defined below
+  nfs:
+    server: kpi6 # Please change this to your NFS server
+    path: /ssd/pv2 # Please change this to the relevant share
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nginx-nfs
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce # Access modes for volumes is defined under Persistent Volumes
+  resources:
+    requests:
+      storage: 5Gi # volume size requested
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nginx-nfs2
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce # Access modes for volumes is defined under Persistent Volumes
+  resources:
+    requests:
+      storage: 5Gi # volume size requested
