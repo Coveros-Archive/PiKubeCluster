@@ -247,7 +247,7 @@ If you never again expect to ssh to your nodes, this probably doesn't matter.
 ## Enable forwarding for CIDR
 You need to uncomment one line and add two new lines. Kubernetes needs
 to be able to build a bridge through iptables in order to stitch everything
-together with Flannel (later)
+together with Flannel (later).
 
     sudo vi /etc/sysctl.conf
     (line 28)
@@ -327,9 +327,14 @@ For my own convenience, I copy the key to a workstation.
 
 [Flannel](https://coreos.com/flannel/docs/latest/) will provide the network 
 layer since the cloud can't. Line 128 defines my pod 
-network to match the kubeadm init above
+network to match the kubeadm init above.
 
     kubectl create -f kube-flannel.yaml 
+
+This was quite frustrating since the majority of tutorials and youtube
+walkthroughs assume that there is already a network layer provided by
+the cloud provider. In our case, we are our own cloud provider. As such
+we have to provider our own network.
 
 #### Give it a second and verify it finished
 
@@ -341,6 +346,12 @@ We'll be using it at the L2 layer, but not with this yaml. This one just
 gets it ready to take our ConfigMap.
 
     kubectl create -f metallb.yaml
+
+This was another source of frustration from the online tutorials that
+have a cloud provider. The cloud provider already handles the load balancing
+service. We don't have that advantage, so we provide it ourselves.
+
+Note that this is not a HaProxy, although it certainly behaves like one.
 
 #### Verify it finished
 
@@ -361,6 +372,8 @@ writing.
 # That's it! You've done the minimum install of a single node kubernetes cluster
 It's not at all useful, yet. But, it is officially a running Kubernetes master
 running on a Raspberry Pi.
+
+### Do not attempt to install any type of Kubernetes Dashboard!
 
 ## Let's join a node
 Do not use my command. That server is long since dead, anyway. Use your string that
