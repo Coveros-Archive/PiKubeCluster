@@ -449,3 +449,15 @@ It's on a node somewhere. Try it from a web browser on your network.
 If you didn't change the metal-l2.yaml file, this is probably
 
 [http://192.168.1.40/](http://192.168.1.40/)
+
+# The results
+## Performance
+Performance is abysmal on the master node. The mandatory pods on the
+master find themselves in perpetual error conditions. This matters most
+when running kubectl commands that change things.
+
+Adding a pod or a few pods will crush the master node for 15-20 minutes
+before settling back down into a stable state.
+
+That said, the other nodes appear to perform just fine. The load balancer
+keeps up with a heavy load of static content.
