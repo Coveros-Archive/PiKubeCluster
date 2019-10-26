@@ -38,7 +38,10 @@ plug one end into your internet provider's switch and the other end into one
 of the open ports on your switch.
 
 ## Storage
-Each host had a 32GB microSD card. These were imaged one at a time on my laptop.
+Each host has a 32GB microSD card. I have a couple of 64GB microSD cards,
+but the performance wasn't the same.
+
+These were imaged one at a time on my laptop.
 It was a chore, especially since the first few dozen times I tried, I messed up
 so badly that it was faster to just re-image all 6 microSD cards.
 
@@ -147,6 +150,10 @@ At this point, go to your workstation and open a terminal
 ### Do this now because if we ever automate this, this is the minimum requirement before triggering with chef
     reboot
 
+## Keep Installing Hosts
+Now, move your HDMI cable to the next host. Move the keyboard, give it
+power and do the initial password and network setup for each node until
+you run out of hosts or patience.
 
 # Next Stage
 From this point on, we should be able to automate these steps with Chef or Ansible.
