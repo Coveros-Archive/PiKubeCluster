@@ -1,14 +1,81 @@
 # Install Kubernetes on a pile of Raspberry Pi
 
 ## My starting hardware
+
+### WARNING: YOU MUST NOT USE A USB HUB TO POWER A RASPBERRY PI ESPECIALLY NOT A STACK OF THEM.
+I DON'T CARE HOW MANY PORTS IT HAS. DO NOT DO IT.
+
+### Raspberry Pi 3B+
 I started with Six Raspberry Pi in a stack with a pair of fans against the stack
-for cooling. Under that was a cheap network switch. Plugged into the bottom of the
-stack was a single SSD hard drive.
+for cooling. 
+
+### Cooling
+A pair of stacked 80mm USB-powered fans is the same height as a stack of
+ seven Raspberry Pi. Coincidence?
+ 
+# Power
+For power to the cluster, I used a 30W multi-port USB charger.  It has 10 ports.
+
+I picked up a bag of 8" micro usb cables for the Raspberry Pi power. The fans
+had their own built-in USB cable.
+
+Sadly, the network switch isn't USB powered. I had it laying around. It 
+uses a wall-wart. Which is to say that the USB power block also has
+a wall-wart. You'll probably need a power strip before you're done.
+
+### Networking
+You won't be joining the wireless network. Please, please, don't join the wireless network.
+
+Instead, you'll be adding the hosts to a network switch. I found a cheap switch
+that has 20-odd ports. I also picked up a bag of 12" network cables.
+
+#### You will also need a cross-over cable.
+You'll need a crossover cable to go between the pi cluster switch
+and whatever network you're about to join. Consider the flood of data
+that would be about to hit your wireless network if you were about to
+run a Kubernetes network over it. Just buy or make the crossover cable and
+plug one end into your internet provider's switch and the other end into one
+of the open ports on your switch.
+
+### Storage
+
+Each host had a 32GB microSD card. These were imaged one at a time on my laptop.
+It was a chore, especially since the first few dozen times I tried, I messed up
+so badly that it was faster to just re-image all 6 microSD cards.
+
+### Image
+I used the [Raspberry Pi Ubuntu 18.04](https://ubuntu.com/download/iot/raspberry-pi) 
+installation image and just used the disk image restoration tool on Ubuntu 18
+on my laptop. You can use dd if you want.
+
+I set up an assembly line of microSD cards on a paper plate and a pair of USB adapter
+fobs that I picked up wherever one picks up such things. I found that I could only 
+image one card at a time, so I'd stick one card in, transfer the image, eject the
+microSD card, stick the next one in, start the next image, transfer the microSD
+card to the next USB adapter and wait for the image to finish.
+
+Lather, rinse, repeat.
+
+### Keyboard and mouse
+I have a wireless keyboard with a tiny little usb plug and I wish it were bigger.
+You won't need a mouse. It wouldn't help, anyway.
+
+### Monitor
+You will need an HDMI monitor.
 
 # Edit your /etc/hosts
 
-    # None of these entries are necessary if your router learns dns names
-    # And none of them are necessary for kubernetes. They're simply here for ssh access
+None of these entries are necessary if your router learns dns names
+And none of them are necessary for kubernetes. They're simply here for ssh access
+and if your network doesn't adapt. Also, keep in mind that these IP addresses
+will probably conflict with addresses on your home network. 
+
+You should find available
+addresses before you go all willy-nilly with this. I learned this the hard
+way. A number of times, actually. This code is provided for my convenience,
+not yours. I intended on making one node a router and putting all the other
+hosts behind that node and serving my own dhcp and you can do that on
+your own time. Or, consider contributing to the repo.
     
     192.168.1.11 kpi1
     192.168.1.12 kpi2
@@ -18,26 +85,30 @@ stack was a single SSD hard drive.
     192.168.1.16 kpi6
     192.168.1.198 radish 
 
-# You'll have to do this step on the PI console unless you want DHCP all over the place
-### ****** IMPORTANT **********************
-# add this line, uncommented, to assign the static IP address of your node. Make sure the spacing matches. It should look like this
-#network:
-#    version: 2
-#    ethernets:
-#        eth0:
-#            dhcp4: true
-#            match:
-#                macaddress: b8:27:eb:1d:70:0f
-#            set-name: eth0
-#            addresses: [192.168.1.11/24]
+## Installation
 
-vi /etc/netplan/50-cloud-init.yaml
-addresses: [192.168.1.11/24]
-addresses: [192.168.1.12/24]
-addresses: [192.168.1.13/24]
-addresses: [192.168.1.14/24]
-addresses: [192.168.1.15/24]
-addresses: [192.168.1.16/24]
+
+## Multi-tasking.
+If you're quick on your feet
+Log in to each node at the console once it boots
+
+## Make your nodes static
+This step is up to you. I didn't want to worry about how to ssh to dynamic hosts.
+
+Edit /etc/netplan/50-cloud-init.yaml
+
+    network:
+        version: 2
+        ethernets:
+            eth0:
+                dhcp4: true
+                match:
+                    macaddress: b8:27:eb:1d:70:0f
+                set-name: eth0
+                addresses: [192.168.1.11/24] # This is the line you're adding per host
+
+The last line will be added by you. It must be aligned properly because yaml.
+
 
 # Once file has been edited, run this
 sudo netplan --debug try # If this fails, fix it before continuing
