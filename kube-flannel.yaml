@@ -125,7 +125,6 @@ data:
     }
   net-conf.json: |
     {
-      # This matches my kubeadm init --pod-network-cidr
       "Network": "100.64.0.0/16",
       "Backend": {
         "Type": "host-gw"

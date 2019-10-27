@@ -13,6 +13,11 @@ for cooling.
 A pair of stacked 80mm USB-powered fans is the same height as a stack of
  seven Raspberry Pi. Coincidence?
  
+ Also, heat sinks. I bought a bag of Raspberry Pi heatsinks. It came
+ with three sizes. I've found a use for two of the sizes. I haven't done
+ a thermal imaging study of the components to see if the heat sinks do
+ any good.
+ 
 ## Power
 For power to the cluster, I used a 30W multi-port USB charger.  It has 10 ports.
 
@@ -195,10 +200,14 @@ you see fit for your needs. It is also possible that this step isn't necessary.
 If you never again expect to ssh to your nodes, this probably doesn't matter.
 
     # run on kpi1 (and so on)
+    sudo hostnamectl --transient set-hostname kpi0
+    sudo hostnamectl --static set-hostname kpi0
+    sudo hostnamectl --pretty set-hostname kpi0
+ 
     sudo hostnamectl --transient set-hostname kpi1
     sudo hostnamectl --static set-hostname kpi1
     sudo hostnamectl --pretty set-hostname kpi1
-    
+       
     sudo hostnamectl --transient set-hostname kpi2
     sudo hostnamectl --static set-hostname kpi2
     sudo hostnamectl --pretty set-hostname kpi2
@@ -238,10 +247,10 @@ If you never again expect to ssh to your nodes, this probably doesn't matter.
     sudo apt-get install -qy kubeadm
 
 ### Disable Swap
-##### This is not necessary on Raspberry Pi Ubuntu Server. It's already off
-    #sudo dphys-swapfile swapoff && \
-    #sudo dphys-swapfile uninstall && \
-    #sudo update-rc.d dphys-swapfile remove
+##### This is not necessary on Raspberry Pi Ubuntu Server. It's already off It is necessary for raspbian Buster
+    sudo dphys-swapfile swapoff && \
+    sudo dphys-swapfile uninstall && \
+    sudo update-rc.d dphys-swapfile remove
 
 
 ## Enable forwarding for CIDR
@@ -297,7 +306,7 @@ From your workstation, run these commands.
 # *************** IMPORTANT ******************
 The following command produces a connect command that you will need later for your
 nodes to join. DO NOT LOSE IT, BUT DEFINITELY SECURE IT! This string gives access to your master.
- 
+   
     sudo kubeadm init --pod-network-cidr=100.64.0.0/16 --service-cidr=100.65.0.0/16 --node-name kpi1
 
 # CAPTURE THE JOIN COMMAND
@@ -305,6 +314,9 @@ nodes to join. DO NOT LOSE IT, BUT DEFINITELY SECURE IT! This string gives acces
 
 The output from one of my runs results in this join string.
 
+    sudo kubeadm join 192.168.1.38:6443 --token 8fncgf.0nhxhi51qhjxuuga \
+        --discovery-token-ca-cert-hash sha256:cf570e7affd34babf2c63fbd8b49b02c01201763a2ac844f760d5dff76b350b6
+        
     sudo kubeadm join 192.168.1.11:6443 --token lo25ld.csjutgcpsnxacxqg --discovery-token-ca-cert-hash sha256:a0e01a1cbc7b901a00ff66d5e9dfc5c042499faeeb4eb454095f1fb4766ddfe4
     
 You'll also need to copy the keys to your own (ubuntu) directory.
@@ -484,3 +496,23 @@ before settling back down into a stable state.
 
 That said, the other nodes appear to perform just fine. The load balancer
 keeps up with a heavy load of static content.
+
+# Add a Raspberry Pi 4B
+## Issues:
+### Power
+3 amp minimum power supply. I tried a 2.4 and a 2.0 amp charger block.
+The keyboard wouldn't even come on. I went as far as buying a second
+Pi 4 when I was buying the 'official' 15W power supply block. It
+wasn't necessary. The power supply fixed the problem.
+
+### HDMI
+The Pi 4 uses a microHDMI port. You'll only need the display while
+you give yourself a static IP address and do the minimum work necessary
+to give yourself SSH access from another workstation.
+
+However, you'll still need that adapter because you'll need to see what
+you're doing in order to log in and change the password and set the
+address.
+
+Also, the ethernet port and the USB ports are swapped in position between
+the Raspberry Pi 3 and the Raspberry Pi 4.
