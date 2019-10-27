@@ -79,6 +79,23 @@ Lather, rinse, repeat.
 You'll get faster the 10th and 11th time you do it. Hopefully, you won't have to
 since you have this handy guide.
 
+At present time, assuming that all the microSD cards are already imaged 
+and ready to install and the hardware is wired up, I can install all 6
+hosts to include setting the IP addresses.
+
+For reference, it takes approximately 1:04 for Ubuntu 18 to boot on a
+Raspberry Pi 3. It takes another 15 seconds or so to enter ubuntu three
+times and the new password twice. And, it takes about 45 seconds to
+edit the netplan and run the commands to activate it.
+
+Once the Raspberry Pi 3 has started to boot and show messages on the 
+console, it is safe to unplug the HDMI port and plug it into the next
+Pi and power it on. By doing this to all hosts, you can pipeline the
+initial installation. Once they're all started, go back to the first
+host and perform the first login. All of the installation will have
+already completed, and you can just move the HDMI and keyboard cables
+from one host to the next.
+
 ## Keyboard and mouse
 I have a wireless keyboard with a tiny little usb plug and I wish it were bigger.
 You won't need a mouse. It wouldn't help, anyway. Most of your access to
@@ -231,33 +248,8 @@ If you never again expect to ssh to your nodes, this probably doesn't matter.
     sudo hostnamectl --static set-hostname kpi6
     sudo hostnamectl --pretty set-hostname kpi6
 
-
-# Next Stage 
-#### I do these commands in small blocks in case something goes wrong.
-
-## Install the required packages for ubuntu 18.04 on Raspberry Pi
-    sudo apt update; sudo apt upgrade -y
-    sudo apt install nfs-common -y
-
-## Install Docker
-    curl -sSL get.docker.com | sh && \
-    sudo usermod ubuntu -aG docker
-
-## Install Kubernetes
-    curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add - && \
-    echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list && \
-    sudo apt-get update -q && \
-    sudo apt-get install -qy kubeadm
-
-### Disable Swap
-##### This is not necessary on Raspberry Pi Ubuntu Server. It's already off It is necessary for raspbian Buster
-    sudo dphys-swapfile swapoff && \
-    sudo dphys-swapfile uninstall && \
-    sudo update-rc.d dphys-swapfile remove
-
-
 ## Enable forwarding for CIDR
-You need to uncomment one line and add two new lines. Kubernetes needs
+You need to uncomment one line and add two new lines on each host. Kubernetes needs
 to be able to build a bridge through iptables in order to stitch everything
 together with Flannel (later).
 
@@ -282,6 +274,35 @@ Run ssh-keygen if you haven't already and then copy them to each of the nodes.
     ssh-copy-id ubuntu@kpi4
     ssh-copy-id ubuntu@kpi5
     ssh-copy-id ubuntu@kpi6
+
+# Next Stage 
+#### I do these commands in small blocks in case something goes wrong.
+
+## Install the required packages for ubuntu 18.04 on Raspberry Pi
+    sudo apt update; sudo apt upgrade -y
+    sudo apt install nfs-common -y
+    sudo apt install gccgo
+
+## Install Docker
+    curl -sSL get.docker.com | sh && \
+    sudo usermod ubuntu -aG docker
+
+Takes about 2 minutes.
+
+## Install Kubernetes
+    curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add - && \
+    echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list && \
+    sudo apt-get update -q && \
+    sudo apt-get install -qy kubeadm
+
+### Timing
+Takes another minute thirty.
+
+### Disable Swap
+##### This is not necessary on Raspberry Pi Ubuntu Server. It's already off It is necessary for raspbian Buster
+    sudo dphys-swapfile swapoff && \
+    sudo dphys-swapfile uninstall && \
+    sudo update-rc.d dphys-swapfile remove
 
 ##  Allow the updates to sort themselves out and ip forwarding to do its thing
 We'll reboot now and also test that the ssh keys were transfered properly.
@@ -312,15 +333,24 @@ nodes to join. DO NOT LOSE IT, BUT DEFINITELY SECURE IT! This string gives acces
    
     sudo kubeadm init --pod-network-cidr=100.64.0.0/16 --service-cidr=100.65.0.0/16 --node-name kpi1
 
+### Timing
+This takes 4:20 on a Raspberry Pi 3B+
+
 # CAPTURE THE JOIN COMMAND
 *Note that the kubeadm output from the above command does not include sudo. You will have to add that yourself.*
 
 The output from one of my runs results in this join string.
 
-    sudo kubeadm join 192.168.1.38:6443 --token 8fncgf.0nhxhi51qhjxuuga \
+    sudo kubeadm join 192.168.1.11:6443 --token aovs4s.9ffao873c8g8q5en \
+    --discovery-token-ca-cert-hash sha256:a66746189912fe85c57c06e2461a6b248aef128ce6493a5626d8aadc7e9fec65 
+
+    #sudo kubeadm join 192.168.1.11:6443 --token m3tgwq.gt9oordqce4rsa7x \
+    --discovery-token-ca-cert-hash sha256:6f9fbe3b7636af6528a5ebdfc4b7af92706f8184276c0e9b4f2f497be14402af
+    
+    #sudo kubeadm join 192.168.1.38:6443 --token 8fncgf.0nhxhi51qhjxuuga \
         --discovery-token-ca-cert-hash sha256:cf570e7affd34babf2c63fbd8b49b02c01201763a2ac844f760d5dff76b350b6
         
-    sudo kubeadm join 192.168.1.11:6443 --token lo25ld.csjutgcpsnxacxqg --discovery-token-ca-cert-hash sha256:a0e01a1cbc7b901a00ff66d5e9dfc5c042499faeeb4eb454095f1fb4766ddfe4
+    #sudo kubeadm join 192.168.1.11:6443 --token lo25ld.csjutgcpsnxacxqg --discovery-token-ca-cert-hash sha256:a0e01a1cbc7b901a00ff66d5e9dfc5c042499faeeb4eb454095f1fb4766ddfe4
     
 You'll also need to copy the keys to your own (ubuntu) directory.
 
@@ -330,7 +360,7 @@ You'll also need to copy the keys to your own (ubuntu) directory.
 
 For my own convenience, I copy the key to a workstation.
 
-    scp $HOME/.kube/config jeff@radish:/home/jeff/ # not into .kube unless you want to overwrite
+    scp $HOME/.kube/config ubuntu@kpi4:/home/ubuntu/ # not into .kube unless you want to overwrite
 
 ## Copy the YAML files from wherever they're stored.
 
@@ -360,7 +390,7 @@ we have to provider our own network.
 We'll be using it at the L2 layer, but not with this yaml. This one just
 gets it ready to take our ConfigMap.
 
-    kubectl create -f metallb.yaml
+    kubectl create -f metallb.yaml -f metal-l2.yaml
 
 This was another source of frustration from the online tutorials that
 have a cloud provider. The cloud provider already handles the load balancing
@@ -378,7 +408,14 @@ will generate external addresses in the range 192.168.1.40-45. It's that
 way because it was available on my own home network at the time of this
 writing.
 
-    kubectl create -f metal-l2.yam
+Don't actually run this. Because of the way that Kubernetes handles restarts,
+if this ConfigMap isn't in place immediately (because of a typo or other
+hiccup), Kubernetes will go into Restart mode which will simply crush the
+Raspberry Pi 3B+. As such, I've included the config map in the metallb.yaml
+file. One wouldn't normally include the ConfigMap with the deployment
+because the ConfigMap should be fairly unique to the installation.
+
+    # kubectl create -f metal-l2.yam
 
 #### Verify it finished
 
@@ -437,7 +474,7 @@ won't get abused by kubelets.
     sudo apt install nfs-kernel-server
     
     sudo blkid
-    mkdir /ssd # Use what name you want, but be ready to change it where it's used
+    sudo mkdir /ssd # Use what name you want, but be ready to change it where it's used
     
 Your UUID string will differ.
 
