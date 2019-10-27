@@ -13,8 +13,8 @@ for cooling.
 A pair of stacked 80mm USB-powered fans is the same height as a stack of
  seven Raspberry Pi. Coincidence?
  
- Also, heat sinks. I bought a bag of Raspberry Pi heatsinks. It came
- with three sizes. I've found a use for two of the sizes. I haven't done
+ Also, heat sinks. I bought a bag of Raspberry Pi heat sinks on thermal sticker pads.
+ It came with three sizes. I've found a use for two of the sizes. I haven't done
  a thermal imaging study of the components to see if the heat sinks do
  any good.
  
@@ -62,7 +62,10 @@ the drive plugged in during installation, something would go wrong.
 ## Image
 I used the [Raspberry Pi Ubuntu 18.04 64-bit](https://ubuntu.com/download/iot/raspberry-pi) 
 installation image and just used the disk image restoration tool on Ubuntu 18
-on my laptop. You can use dd if you want.
+on my laptop. You can use dd if you want. That said, as of this writing,
+Ubuntu 19 has been released, and enough things have changed that the following
+procedure likely will not work with Ubuntu 19. You'll need to locate the
+Version 18 of the Ubuntu image.
 
 I set up an assembly line of microSD cards on a paper plate and a pair of USB adapter
 fobs that I picked up wherever one picks up such things. I found that I could only 
