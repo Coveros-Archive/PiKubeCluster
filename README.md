@@ -148,11 +148,15 @@ last line. It must be aligned properly because yaml.
         version: 2
         ethernets:
             eth0:
-                dhcp4: true
+                dhcp4: false
                 match:
                     macaddress: b8:27:eb:1d:70:0f
                 set-name: eth0
                 addresses: [192.168.1.11/24] # This is the line you're adding per host
+                gateway4: 192.168.1.1
+                nameservers:
+                    addresses: [8.8.8.8]
+
 
 Once file has been edited, run this
 
@@ -164,15 +168,22 @@ Once file has been edited, run this
 ### DO THIS STEP ON EVERY NODE! DO NOT SKIP
 
 At this point, go to your workstation and open a terminal
-
-    ssh ubuntu@192.168.1.11
+On Ubuntu 18.04
 
     sudo cp /boot/firmware/cmdline.txt /boot/firmware/cmdline_backup.txt
-    orig="$(head -n1 /boot/firmware/cmdline.txt) cgroup_enable=cpuset cgroup_enable=memory hdmi_force_hotplug=1"
+    orig="$(head -n1 /boot/firmware/cmdline.txt) cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1 hdmi_force_hotplug=1"
     echo $orig | sudo tee /boot/firmware/cmdline.txt
 
+On Raspbian Buster
+
+    sudo cp /boot/cmdline.txt /boot/cmdline_backup.txt
+    orig="$(head -n1 /boot/cmdline.txt) cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1 hdmi_force_hotplug=1"
+    echo $orig | sudo tee /boot/cmdline.txt
+    
 ### You need to reboot to apply the /boot/firmware/cmdline.txt because docker won't run without it.
 ### Do this now because if we ever automate this, this is the minimum requirement before triggering with chef
+### Don't do it during demo, though.
+
     reboot
 
 ## Keep Installing Hosts
@@ -266,13 +277,20 @@ Once this has been done on all the hosts you want to use in the cluser,
 Switch to your regular workstation. Get all the certificates passed all at once
 Run ssh-keygen if you haven't already and then copy them to each of the nodes.
  
-    ssh-keygen
-    
+ 
     ssh-copy-id ubuntu@kpi1
     ssh-copy-id ubuntu@kpi2
     ssh-copy-id ubuntu@kpi3
     ssh-copy-id ubuntu@kpi4
     ssh-copy-id ubuntu@kpi5
+  
+    ssh-keygen
+    
+    ssh-copy-id pi@kpi1
+    ssh-copy-id pi@kpi2
+    ssh-copy-id pi@kpi3
+    ssh-copy-id pi@kpi4
+    ssh-copy-id pi@kpi5
     ssh-copy-id ubuntu@kpi6
 
 # Next Stage 
@@ -283,9 +301,30 @@ Run ssh-keygen if you haven't already and then copy them to each of the nodes.
     sudo apt install nfs-common -y
     sudo apt install gccgo
 
+### Disable Swap
+##### This is not necessary on Raspberry Pi Ubuntu Server. It's already off It is necessary for raspbian Buster
+
+But, on Raspbian, this will keep coming back unless you put this in rc.local
+    sudo vi /etc/rc.local
+    
+    dphys-swapfile swapoff
+    dphys-swapfile uninstall
+    update-rc.d dphys-swapfile remove
+
 ## Install Docker
+On Ubuntu
+
     curl -sSL get.docker.com | sh && \
     sudo usermod ubuntu -aG docker
+    
+    logout
+ 
+ On Raspbian
+ 
+    curl -sSL get.docker.com | sh && \
+    sudo usermod pi -aG docker
+    
+    logout
 
 Takes about 2 minutes.
 
@@ -298,11 +337,6 @@ Takes about 2 minutes.
 ### Timing
 Takes another minute thirty.
 
-### Disable Swap
-##### This is not necessary on Raspberry Pi Ubuntu Server. It's already off It is necessary for raspbian Buster
-    sudo dphys-swapfile swapoff && \
-    sudo dphys-swapfile uninstall && \
-    sudo update-rc.d dphys-swapfile remove
 
 ##  Allow the updates to sort themselves out and ip forwarding to do its thing
 We'll reboot now and also test that the ssh keys were transfered properly.
@@ -341,14 +375,20 @@ This takes 4:20 on a Raspberry Pi 3B+
 
 The output from one of my runs results in this join string.
 
-    sudo kubeadm join 192.168.1.11:6443 --token aovs4s.9ffao873c8g8q5en \
-    --discovery-token-ca-cert-hash sha256:a66746189912fe85c57c06e2461a6b248aef128ce6493a5626d8aadc7e9fec65 
+    sudo
+    
+    
+    #sudo kubeadm join 192.168.1.11:6443 --token f42uo6.cvq87my0gbeex4r2 \
+    #--discovery-token-ca-cert-hash sha256:3280f34bbec798fdb1fc7655ef9299f2796fdb2a1a01225f41d1f1741952e3a2 
+
+    #sudo kubeadm join 192.168.1.11:6443 --token aovs4s.9ffao873c8g8q5en \
+    #--discovery-token-ca-cert-hash sha256:a66746189912fe85c57c06e2461a6b248aef128ce6493a5626d8aadc7e9fec65 
 
     #sudo kubeadm join 192.168.1.11:6443 --token m3tgwq.gt9oordqce4rsa7x \
-    --discovery-token-ca-cert-hash sha256:6f9fbe3b7636af6528a5ebdfc4b7af92706f8184276c0e9b4f2f497be14402af
+    #--discovery-token-ca-cert-hash sha256:6f9fbe3b7636af6528a5ebdfc4b7af92706f8184276c0e9b4f2f497be14402af
     
     #sudo kubeadm join 192.168.1.38:6443 --token 8fncgf.0nhxhi51qhjxuuga \
-        --discovery-token-ca-cert-hash sha256:cf570e7affd34babf2c63fbd8b49b02c01201763a2ac844f760d5dff76b350b6
+     #   --discovery-token-ca-cert-hash sha256:cf570e7affd34babf2c63fbd8b49b02c01201763a2ac844f760d5dff76b350b6
         
     #sudo kubeadm join 192.168.1.11:6443 --token lo25ld.csjutgcpsnxacxqg --discovery-token-ca-cert-hash sha256:a0e01a1cbc7b901a00ff66d5e9dfc5c042499faeeb4eb454095f1fb4766ddfe4
     
@@ -366,7 +406,7 @@ For my own convenience, I copy the key to a workstation.
 
     mkdir kube
     cd kube
-    scp -r jeff@radish:/home/jeff/kube/ /home/ubuntu/kube # Customize this
+    scp -r jeff@radish:/home/jeff/kube/ ~/kube # Customize this
 
 ## Install flannel.
 

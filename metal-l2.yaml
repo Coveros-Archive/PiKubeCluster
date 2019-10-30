@@ -8,6 +8,5 @@ data:
     address-pools:
     - name: default
       protocol: layer2
-      # This is my available external address pool for nodes.
       addresses:
       - 192.168.1.40-192.168.1.45
