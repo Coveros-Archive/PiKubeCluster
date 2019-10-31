@@ -1,0 +1,17 @@
+#Edit /etc/netplan/50-cloud-init.yaml to look like this. You'll need to add the
+#last line. It must be aligned properly because yaml.
+# Don't copy this file over yours!
+
+    network:
+        version: 2
+        ethernets:
+            eth0:
+                dhcp4: false # Change this to false
+                match:
+                    macaddress: b8:27:eb:1d:70:0f # this line should already be fine
+                set-name: eth0
+                addresses: [192.168.1.11/24] # This is the line you're adding per host
+                gateway4: 192.168.1.1 # Make this your gateway
+                nameservers:
+                    addresses: [8.8.8.8] # Google DNS
+

@@ -218,6 +218,7 @@ your own time. Or, consider contributing to the repo. I'm going to assume
 that you can edit your own hosts file and add the appropriate addresses.
     
     # Add to /etc/hosts
+    192.168.1.10 kpi0
     192.168.1.11 kpi1
     192.168.1.12 kpi2
     192.168.1.13 kpi3
@@ -259,6 +260,10 @@ If you never again expect to ssh to your nodes, this probably doesn't matter.
     sudo hostnamectl --static set-hostname kpi6
     sudo hostnamectl --pretty set-hostname kpi6
 
+    sudo hostnamectl --transient set-hostname kpi7
+    sudo hostnamectl --static set-hostname kpi7
+    sudo hostnamectl --pretty set-hostname kpi7
+
 ## Enable forwarding for CIDR
 You need to uncomment one line and add two new lines on each host. Kubernetes needs
 to be able to build a bridge through iptables in order to stitch everything
@@ -299,7 +304,7 @@ Run ssh-keygen if you haven't already and then copy them to each of the nodes.
 ## Install the required packages for ubuntu 18.04 on Raspberry Pi
     sudo apt update; sudo apt upgrade -y
     sudo apt install nfs-common -y
-    sudo apt install gccgo
+    sudo apt install gccgo -y
 
 ### Disable Swap
 ##### This is not necessary on Raspberry Pi Ubuntu Server. It's already off It is necessary for raspbian Buster
