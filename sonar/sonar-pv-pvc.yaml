@@ -1,0 +1,51 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: sonar-data
+spec:
+  capacity:
+    storage: 31Gi
+  accessModes:
+    - ReadWriteOnce
+  nfs:
+    server: kpi6 # Please change this to your NFS server
+    path: /ssd/sonardata # Please change this to the relevant share
+
+---
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: sonar-extensions
+spec:
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 31Gi
+  nfs:
+    server: kpi6 # Please change this to your NFS server
+    path: /ssd/sonarextensions # Please change this to the relevant share
+
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: sonar-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 31Gi
+---
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: sonar-extensions
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 31Gi

@@ -225,6 +225,7 @@ that you can edit your own hosts file and add the appropriate addresses.
     192.168.1.14 kpi4
     192.168.1.15 kpi5
     192.168.1.16 kpi6
+    192.168.1.17 kpi7
     192.168.1.198 radish 
 
 Copy these entries and paste them on the appropriate host. Edit as
@@ -275,6 +276,9 @@ together with Flannel (later).
     net.ipv4.ip_forward=1
     net.bridge.bridge-nf-call-ip6tables = 1
     net.bridge.bridge-nf-call-iptables = 1
+    #net.ipv4.conf.all.arp_ignore=1
+    #net.ipv4.conf.all.arp_announce=2
+
 
 ## SSH Convenience
 
@@ -282,15 +286,22 @@ Once this has been done on all the hosts you want to use in the cluser,
 Switch to your regular workstation. Get all the certificates passed all at once
 Run ssh-keygen if you haven't already and then copy them to each of the nodes.
  
+    ssh-keygen
+ 
+ Ubuntu nodes
  
     ssh-copy-id ubuntu@kpi1
     ssh-copy-id ubuntu@kpi2
     ssh-copy-id ubuntu@kpi3
     ssh-copy-id ubuntu@kpi4
     ssh-copy-id ubuntu@kpi5
+    ssh-copy-id ubuntu@kpi6
+    ssh-copy-id pi@kpi0
+    ssh-copy-id pi@kpi7
   
-    ssh-keygen
     
+Raspbian nodes
+
     ssh-copy-id pi@kpi1
     ssh-copy-id pi@kpi2
     ssh-copy-id pi@kpi3
@@ -348,12 +359,14 @@ We'll reboot now and also test that the ssh keys were transfered properly.
 
 From your workstation, run these commands.
 
+    ssh -t pi@kpi0 "sudo reboot"
     ssh -t ubuntu@kpi1 "sudo reboot"
     ssh -t ubuntu@kpi2 "sudo reboot"
     ssh -t ubuntu@kpi3 "sudo reboot"
     ssh -t ubuntu@kpi4 "sudo reboot"
     ssh -t ubuntu@kpi5 "sudo reboot"
     ssh -t ubuntu@kpi6 "sudo reboot"
+    ssh -t pi@kpi7 "sudo reboot"
 
 ## Next Stage
 
@@ -371,6 +384,8 @@ The following command produces a connect command that you will need later for yo
 nodes to join. DO NOT LOSE IT, BUT DEFINITELY SECURE IT! This string gives access to your master.
    
     sudo kubeadm init --pod-network-cidr=100.64.0.0/16 --service-cidr=100.65.0.0/16 --node-name kpi1
+
+    sudo kubeadm init --pod-network-cidr=100.64.0.0/16 --service-cidr=100.65.0.0/16 --node-name kpi7
 
 ### Timing
 This takes 4:20 on a Raspberry Pi 3B+
@@ -403,7 +418,7 @@ You'll also need to copy the keys to your own (ubuntu) directory.
     sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
     sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
-For my own convenience, I copy the key to a workstation.
+For my own convenience, I copy the key to a workstation. (4 because it ends up below 1 in my terminal windows)
 
     scp $HOME/.kube/config ubuntu@kpi4:/home/ubuntu/ # not into .kube unless you want to overwrite
 
@@ -422,7 +437,7 @@ network to match the kubeadm init above.
     kubectl create -f kube-flannel.yaml 
 
 This was quite frustrating since the majority of tutorials and youtube
-walkthroughs assume that there is already a network layer provided by
+walk-throughs assume that there is already a network layer provided by
 the cloud provider. In our case, we are our own cloud provider. As such
 we have to provider our own network.
 

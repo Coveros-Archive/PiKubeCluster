@@ -12,9 +12,6 @@ spec:
       labels:
         app: postgres
     spec:
-      #nodeSelector:
-      #  piversion: 4
-      #  memory: 4GB
       containers:
         - name: postgres
           image: postgres:12.0
