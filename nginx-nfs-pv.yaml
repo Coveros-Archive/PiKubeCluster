@@ -9,8 +9,8 @@ spec:
     - ReadWriteOnce # Access modes are defined below
   persistentVolumeReclaimPolicy: Recycle # Reclaim policies are defined below
   nfs:
-    server: kpi6 # Please change this to your NFS server
-    path: /ssd/pv1 # Please change this to the relevant share
+    server: kpi0 # Please change this to your NFS server
+    path: /thumbe/0 # Please change this to the relevant share
 
 ---
 
@@ -25,8 +25,8 @@ spec:
     - ReadWriteOnce # Access modes are defined below
   persistentVolumeReclaimPolicy: Recycle # Reclaim policies are defined below
   nfs:
-    server: kpi6 # Please change this to your NFS server
-    path: /ssd/pv2 # Please change this to the relevant share
+    server: kpi0 # Please change this to your NFS server
+    path: /thumb/1 # Please change this to the relevant share
 
 ---
 

@@ -261,9 +261,9 @@ If you never again expect to ssh to your nodes, this probably doesn't matter.
     sudo hostnamectl --static set-hostname kpi6
     sudo hostnamectl --pretty set-hostname kpi6
 
-    sudo hostnamectl --transient set-hostname kpi7
-    sudo hostnamectl --static set-hostname kpi7
-    sudo hostnamectl --pretty set-hostname kpi7
+    sudo hostnamectl --transient set-hostname master
+    sudo hostnamectl --static set-hostname master
+    sudo hostnamectl --pretty set-hostname master
 
 ## Enable forwarding for CIDR
 You need to uncomment one line and add two new lines on each host. Kubernetes needs
@@ -385,7 +385,7 @@ nodes to join. DO NOT LOSE IT, BUT DEFINITELY SECURE IT! This string gives acces
    
     sudo kubeadm init --pod-network-cidr=100.64.0.0/16 --service-cidr=100.65.0.0/16 --node-name kpi1
 
-    sudo kubeadm init --pod-network-cidr=100.64.0.0/16 --service-cidr=100.65.0.0/16 --node-name kpi7
+    sudo kubeadm init --pod-network-cidr=100.64.0.0/16 --service-cidr=100.65.0.0/16 --node-name master
 
 ### Timing
 This takes 4:20 on a Raspberry Pi 3B+
@@ -490,6 +490,10 @@ running on a Raspberry Pi.
 ## Let's join a node
 Do not use my command. That server is long since dead, anyway. Use your string that
 you copied from the kubeadm init you ran on the master node. I did tell you to save it.
+
+The join token will only last 24 hours. If you want to later join a node,
+
+     kubeadm token create --print-join-command
 
 ## From your workstation
 
