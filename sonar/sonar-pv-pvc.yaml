@@ -11,6 +11,7 @@ spec:
     server: kpi0 # Please change this to your NFS server
     path: /thumb/2/sonarqube/sonardata # Please change this to the relevant share
 
+
 ---
 
 apiVersion: v1
@@ -25,6 +26,7 @@ spec:
   nfs:
     server: kpi0 # Please change this to your NFS server
     path: /thumb/2/sonarqube/sonarextensions # Please change this to the relevant share
+
 
 ---
 kind: PersistentVolumeClaim
