@@ -6,12 +6,12 @@ metadata:
     app: postgres
 spec:
   capacity:
-    storage: 5Gi
+    storage: 10Gi
   accessModes:
     - ReadWriteMany
   nfs:
-    server: kpi6 # Please change this to your NFS server
-    path: /ssd/pv3 # Please change this to the relevant share
+    server: kpi0 # Please change this to your NFS server
+    path: /thumb/1/database/postgres # Please change this to the relevant share
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1
@@ -24,4 +24,4 @@ spec:
     - ReadWriteMany
   resources:
     requests:
-      storage: 5Gi
+      storage: 10Gi
