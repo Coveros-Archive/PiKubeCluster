@@ -10,7 +10,7 @@ spec:
   persistentVolumeReclaimPolicy: Recycle # Reclaim policies are defined below
   nfs:
     server: kpi0 # Please change this to your NFS server
-    path: /thumbe/0 # Please change this to the relevant share
+    path: /thumb/1/website1 # Please change this to the relevant share
 
 ---
 
@@ -26,7 +26,7 @@ spec:
   persistentVolumeReclaimPolicy: Recycle # Reclaim policies are defined below
   nfs:
     server: kpi0 # Please change this to your NFS server
-    path: /thumb/1 # Please change this to the relevant share
+    path: /thumb/2/website1 # Please change this to the relevant share
 
 ---
 

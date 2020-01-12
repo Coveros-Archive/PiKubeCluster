@@ -8,8 +8,8 @@ spec:
   accessModes:
     - ReadWriteOnce
   nfs:
-    server: kpi6 # Please change this to your NFS server
-    path: /ssd/sonardata # Please change this to the relevant share
+    server: kpi0 # Please change this to your NFS server
+    path: /thumb/2/sonarqube/sonardata # Please change this to the relevant share
 
 ---
 
@@ -24,7 +24,7 @@ spec:
     storage: 31Gi
   nfs:
     server: kpi6 # Please change this to your NFS server
-    path: /ssd/sonarextensions # Please change this to the relevant share
+    path: /thumb/2/sonarqube/sonarextensions # Please change this to the relevant share
 
 ---
 kind: PersistentVolumeClaim
