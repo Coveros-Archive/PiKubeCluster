@@ -218,15 +218,15 @@ your own time. Or, consider contributing to the repo. I'm going to assume
 that you can edit your own hosts file and add the appropriate addresses.
     
     # Add to /etc/hosts
-    192.168.1.10 kpi0
-    192.168.1.11 kpi1
-    192.168.1.12 kpi2
-    192.168.1.13 kpi3
-    192.168.1.14 kpi4
-    192.168.1.15 kpi5
-    192.168.1.16 kpi6
-    192.168.1.17 kpi7
-    192.168.1.198 radish 
+192.168.2.10 kpi0
+192.168.2.11 kpi1
+192.168.2.12 kpi2
+192.168.2.13 kpi3
+192.168.2.14 kpi4
+192.168.2.15 kpi5
+192.168.2.16 kpi6
+192.168.2.17 kpi7
+192.168.1.198 radish 
 
 Copy these entries and paste them on the appropriate host. Edit as
 you see fit for your needs. It is also possible that this step isn't necessary.
@@ -318,7 +318,7 @@ Raspbian nodes
     sudo apt install gccgo -y
 
 ### Disable Swap
-##### This is not necessary on Raspberry Pi Ubuntu Server. It's already off It is necessary for raspbian Buster
+##### This is not necessary on Raspberry Pi Ubuntu Server. It's already off.  It is necessary for raspbian Buster
 
 But, on Raspbian, this will keep coming back unless you put this in rc.local
     sudo vi /etc/rc.local
@@ -330,9 +330,8 @@ But, on Raspbian, this will keep coming back unless you put this in rc.local
 ## Install Docker
 On Ubuntu
 
-    curl -sSL get.docker.com | sh && \
-    sudo usermod ubuntu -aG docker
-    
+    sudo apt install docker.io -y
+    sudo systemctl enable docker.service
     logout
  
  On Raspbian
@@ -395,7 +394,8 @@ This takes 4:20 on a Raspberry Pi 3B+
 
 The output from one of my runs results in this join string.
 
-    sudo
+    sudo kubeadm join 192.168.2.17:6443 --token hxgcvv.6hr1nofaoxxqt2z6 \
+    --discovery-token-ca-cert-hash sha256:3670d0dcedb649cfcf170c15ff92bc26e341ddc7b8e93f6eb05a904e7ecd9607
     
     
     #sudo kubeadm join 192.168.1.11:6443 --token f42uo6.cvq87my0gbeex4r2 \
@@ -537,7 +537,6 @@ won't get abused by kubelets.
     ssh ubuntu@kpi6
     sudo apt install nfs-kernel-server
     
-    sudo blkid
     sudo mkdir /ssd # Use what name you want, but be ready to change it where it's used
     
 Your UUID string will differ.

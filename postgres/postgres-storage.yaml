@@ -11,7 +11,7 @@ spec:
     - ReadWriteMany
   nfs:
     server: kpi0 # Please change this to your NFS server
-    path: /thumb/1/database/postgres # Please change this to the relevant share
+    path: /thumb/2/database/postgres # Please change this to the relevant share
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1

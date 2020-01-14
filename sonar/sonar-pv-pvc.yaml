@@ -25,7 +25,7 @@ spec:
     storage: 31Gi
   nfs:
     server: kpi0 # Please change this to your NFS server
-    path: /thumb/2/sonarqube/sonarextensions # Please change this to the relevant share
+    path: /thumb/1/sonarqube/sonarextensions # Please change this to the relevant share
 
 
 ---
