@@ -1,10 +1,13 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
     app: sonarqube
   name: sonarqube
 spec:
+  selector:
+    matchLabels:
+      app: sonarqube
   replicas: 1
   template:
     metadata:
@@ -23,7 +26,7 @@ spec:
               memory: 2048Mi
           env:
             - name: "SONARQUBE_JDBC_URL"
-              value: "jdbc:postgresql://sonar-postgres:5432/sonar"
+              value: "jdbc:postgresql://postgres:5432/sonar"
             - name: "SONARQUBE_JDBC_PASSWORD"
               valueFrom:
                 secretKeyRef:

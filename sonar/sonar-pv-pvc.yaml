@@ -9,7 +9,7 @@ spec:
     - ReadWriteOnce
   nfs:
     server: kpi0 # Please change this to your NFS server
-    path: /thumb/2/sonarqube/sonardata # Please change this to the relevant share
+    path: /thumb/1/sonarqube/sonardata # Please change this to the relevant share
 
 
 ---
