@@ -1,0 +1,27 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: sonar-postgres-pv-volume
+  labels:
+    app: postgres
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteMany
+  nfs:
+    server: kpi0 # Please change this to your NFS server
+    path: /thumb/2/database/sonar-postgres # Please change this to the relevant share
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: sonar-postgres-pv-claim
+  labels:
+    app: postgres
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi

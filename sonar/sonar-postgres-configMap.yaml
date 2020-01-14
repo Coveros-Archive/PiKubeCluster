@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sonar-postgres-config
+  labels:
+    app: postgres
+data:
+  POSTGRES_DB: sonar
+  POSTGRES_USER: sonar
+  POSTGRES_PASSWORD: #CHANGEME#
+
