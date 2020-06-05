@@ -212,7 +212,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: status.hostIP
-        image: metallb/speaker:v0.8.1
+        image: metallb/speaker:v0.9.3
         imagePullPolicy: IfNotPresent
         name: speaker
         ports:

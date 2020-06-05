@@ -7,5 +7,5 @@ metadata:
 data:
   POSTGRES_DB: sonar
   POSTGRES_USER: sonar
-  POSTGRES_PASSWORD: #CHANGEME#
+  POSTGRES_PASSWORD: N0chanc3
 

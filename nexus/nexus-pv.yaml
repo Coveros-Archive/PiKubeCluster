@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nexus-nfs
+  labels:
+    namespace: devops-tools
+spec:
+  capacity:
+    storage: 50Gi # This size is used to match a volume to a tenents claim
+  accessModes:
+    - ReadWriteMany 
+  nfs:
+    server: kpi0 # Please change this to your NFS server
+    path: /thumb/1/nexus    # Please change this to the relevant share
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nexus-nfs
+  namespace: devops-tools
+  labels:
+    app: nexus-server
+spec:
+  accessModes:
+    - ReadWriteMany 
+  resources:
+    requests:
+      storage: 50Gi # volume size requested
